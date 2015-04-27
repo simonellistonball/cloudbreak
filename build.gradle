@@ -66,7 +66,7 @@ subprojects {
     }
 
     repositories {
-        mavenCentral()
+        maven { url "http://repo1.maven.org/maven2" }
         maven { url "http://maven.sequenceiq.com/snapshots" }
         maven { url "http://maven.sequenceiq.com/release" }
         maven { url "http://maven.sequenceiq.com/releases" }

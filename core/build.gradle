@@ -1,11 +1,12 @@
 buildscript {
     repositories {
-        mavenCentral()
-        jcenter()
+        maven  { url "http://repo1.maven.org/maven2" }
+        jcenter { url "http://jcenter.bintray.com/" }
     }
     dependencies {
         classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
         classpath "com.smokejumperit.gradle.license:Gradle-License-Report:0.0.2"
+        classpath 'org.springframework:springloaded:1.2.1.RELEASE'
     }
 }
 
@@ -18,6 +19,13 @@ mainClassName = 'com.sequenceiq.cloudbreak.CloudbreakApplication'
 
 jar {
     baseName = 'cloudbreak'
+}
+
+idea {
+    module {
+        inheritOutputDirs = false
+        outputDir = file("$buildDir/classes/main/")
+    }
 }
 
 dependencies {
