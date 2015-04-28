@@ -25,14 +25,7 @@ format_disks() {
   START_LABEL=platform_disk_start_label
   mkdir /hadoopfs
   for (( i=1; i<=15; i++ )); do
-    LABEL=$(printf "\x$((START_LABEL+i))")
-    if [ -e /dev/platform_disk_prefix"$LABEL" ]; then
-      mkfs -E lazy_itable_init=1 -O uninit_bg -F -t ext4 /dev/platform_disk_prefix${LABEL}
-      mkdir /hadoopfs/fs${i}
-      echo /dev/platform_disk_prefix${LABEL} /hadoopfs/fs${i} ext4  defaults 0 2 >> /etc/fstab
-      mount /hadoopfs/fs${i}
-      DOCKER_VOLUME_PARAMS="${DOCKER_VOLUME_PARAMS} -v /hadoopfs/fs${i}:/hadoopfs/fs${i}"
-    fi
+    mkdir /hadoopfs/fs${i}
   done
 }
 
