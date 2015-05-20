@@ -57,19 +57,29 @@ public class OpenStackMetadataSetup implements MetadataSetup {
                 LOGGER.info("NETWORK RESOURCE MAP: {}", adrMap);
 
                 for (String key : adrMap.keySet()) {
-                    LOGGER.info("NETWORK RESOURCE Keys: {}", key);
+                    LOGGER.info("NETWORK RESOURCE Key: {}", key);
 
                     List<? extends Address> adrList = adrMap.get(key);
 
-                    //just pick a private IP don't care which one if it has multiple IPs
-                    LOGGER.info("NETWORK RESOURCE Keys: {}", key);
-
-                    if ("hdp-net".equals(key)) {
-                        privateIp = adrList.get(0).getAddr();
-                    } else {
-                        publicIp = adrList.get(0).getAddr();
+                    for (Address adr : adrList) {
+                        LOGGER.info("NETWORK RESOURCE Key: {}, adr: {}", key, adr);
+                        switch (adr.getType()) {
+                            case "fixed":
+                                privateIp = adr.getAddr();
+                                LOGGER.info("NETWORK RESOURCE fixed: {}", privateIp);
+                                break;
+                            case "floating":
+                                publicIp = adr.getAddr();
+                                LOGGER.info("NETWORK RESOURCE floating: {}", publicIp);
+                                break;
+                            default:
+                                LOGGER.info("NETWORK RESOURCE no such type: {}", adr.getType());
+                        }
                     }
+                }
 
+                if (publicIp == null) {
+                    publicIp = privateIp;
                 }
 
                 instancesCoreMetadata.add(new CoreInstanceMetaData(
