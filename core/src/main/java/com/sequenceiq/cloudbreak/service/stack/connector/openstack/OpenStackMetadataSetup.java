@@ -50,16 +50,32 @@ public class OpenStackMetadataSetup implements MetadataSetup {
 
                 // Getting a private IP for any network
                 String privateIp = null;
+                String publicIp = null;
+
                 Map<String, List<? extends Address>> adrMap = server.getAddresses().getAddresses();
-                for (List<? extends Address> adrList : adrMap.values()) {
+
+                LOGGER.info("NETWORK RESOURCE MAP: {}", adrMap);
+
+                for (String key : adrMap.keySet()) {
+                    LOGGER.info("NETWORK RESOURCE Keys: {}", key);
+
+                    List<? extends Address> adrList = adrMap.get(key);
+
                     //just pick a private IP don't care which one if it has multiple IPs
-                    privateIp = adrList.get(0).getAddr();
+                    LOGGER.info("NETWORK RESOURCE Keys: {}", key);
+
+                    if ("hdp-net".equals(key)) {
+                        privateIp = adrList.get(0).getAddr();
+                    } else {
+                        publicIp = adrList.get(0).getAddr();
+                    }
+
                 }
 
                 instancesCoreMetadata.add(new CoreInstanceMetaData(
                         resourceId,
                         privateIp,
-                        privateIp,
+                        publicIp,
                         server.getOsExtendedVolumesAttached().size(),
                         stack.getInstanceGroupByInstanceGroupName(server.getMetadata().get(HeatTemplateBuilder.CB_INSTANCE_GROUP_NAME))
                 ));

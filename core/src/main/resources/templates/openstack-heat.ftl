@@ -68,6 +68,13 @@ ${userdata}
 
   </#list>
 
+  ambari_floating_cbgateway_0:
+      type: OS::Neutron::FloatingIP
+      properties:
+        floating_network_id: { get_param: public_net_id }
+        port_id: { get_resource: ambari_app_port_cbgateway_0 }
+
+
 outputs:
   <#list agents as agent>
   <#assign m = agent.metadata?eval>
