@@ -86,7 +86,7 @@ public abstract class Network {
     private boolean publicInAccount;
 
     @Enumerated(EnumType.STRING)
-    private NetworkStatus status;
+    private ResourceStatus status;
 
     public Long getId() {
         return id;
@@ -144,11 +144,11 @@ public abstract class Network {
         this.publicInAccount = publicInAccount;
     }
 
-    public NetworkStatus getStatus() {
+    public ResourceStatus getStatus() {
         return status;
     }
 
-    public void setStatus(NetworkStatus status) {
+    public void setStatus(ResourceStatus status) {
         this.status = status;
     }
 
