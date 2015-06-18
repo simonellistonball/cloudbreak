@@ -67,6 +67,7 @@ import com.sequenceiq.cloudbreak.service.stack.flow.ConsulMetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 import com.sequenceiq.cloudbreak.service.stack.flow.ProvisioningService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
+import com.sequenceiq.cloudbreak.service.stack.flow.StackSyncService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationService;
 
 @Service
@@ -107,6 +108,8 @@ public class SimpleStackFacade implements StackFacade {
     private StackUpdater stackUpdater;
     @Inject
     private SubnetRepository subnetRepository;
+    @Inject
+    private StackSyncService stackSyncService;
 
     @Override
     public FlowContext bootstrapCluster(FlowContext context) throws CloudbreakException {
@@ -340,12 +343,7 @@ public class SimpleStackFacade implements StackFacade {
             Stack stack = stackService.getById(actualContext.getStackId());
             MDCBuilder.buildMdcContext(stack);
             if (!stack.isDeleteInProgress()) {
-                String statusReason = "State of the cluster infrastructure has been synchronized.";
-                if (Status.stopStatusesForUpdate().contains(stack.getStatus())) {
-                    stackUpdater.updateStackStatus(stack.getId(), STOPPED, statusReason);
-                } else if (Status.availableStatusesForUpdate().contains(stack.getStatus())) {
-                    stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, statusReason);
-                }
+                stackSyncService.sync(stack.getId());
             }
         } catch (Exception e) {
             LOGGER.error("Exception during the stack sync process: {}", e.getMessage());

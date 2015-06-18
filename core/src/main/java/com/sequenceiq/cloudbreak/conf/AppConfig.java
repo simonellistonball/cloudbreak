@@ -50,6 +50,7 @@ import com.sequenceiq.cloudbreak.service.credential.CredentialHandler;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
+import com.sequenceiq.cloudbreak.service.stack.connector.SyncStateFinder;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Configuration
@@ -86,6 +87,9 @@ public class AppConfig {
 
     @Inject
     private List<MetadataSetup> metadataSetups;
+
+    @Inject
+    private List<SyncStateFinder> syncStateFinders;
 
     @Inject
     private List<CredentialHandler<? extends Credential>> credentialHandlers;
@@ -152,6 +156,15 @@ public class AppConfig {
         Map<CloudPlatform, MetadataSetup> map = new HashMap<>();
         for (MetadataSetup metadataSetup : metadataSetups) {
             map.put(metadataSetup.getCloudPlatform(), metadataSetup);
+        }
+        return map;
+    }
+
+    @Bean
+    public Map<CloudPlatform, SyncStateFinder> syncStateFinders() {
+        Map<CloudPlatform, SyncStateFinder> map = new HashMap<>();
+        for (SyncStateFinder syncStateFinder : syncStateFinders) {
+            map.put(syncStateFinder.cloudPlatform(), syncStateFinder);
         }
         return map;
     }

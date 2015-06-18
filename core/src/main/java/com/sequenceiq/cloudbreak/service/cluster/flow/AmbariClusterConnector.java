@@ -98,7 +98,6 @@ public class AmbariClusterConnector {
     private RecipeEngine recipeEngine;
     @Inject
     private PluginManager pluginManager;
-
     @Inject
     private AmbariHostsStatusCheckerTask ambariHostsStatusCheckerTask;
     @Inject
@@ -107,7 +106,8 @@ public class AmbariClusterConnector {
     private RSDecommissionStatusCheckerTask rsDecommissionStatusCheckerTask;
     @Inject
     private ClusterSecurityService securityService;
-
+    @Inject
+    private InstanceTerminationHandler instanceTerminationHandler;
     @Inject
     private AmbariHostsRemover ambariHostsRemover;
     @Inject
@@ -183,18 +183,44 @@ public class AmbariClusterConnector {
             if (recipesFound(hostGroupAsSet)) {
                 recipeEngine.setupRecipesOnHosts(stack, hostGroup.getRecipes(), new HashSet<>(hostMetadata));
             }
-            pollingResult = waitForAmbariOperations(stack, ambariClient, installServices(hosts, stack, ambariClient, hostGroupAdjustment));
-            if (isSuccess(pollingResult)) {
-                pollingResult = waitForAmbariOperations(stack, ambariClient, singletonMap("START_SERVICES", ambariClient.startAllServices()));
+            try {
+                pollingResult = waitForAmbariOperations(stack, ambariClient, installServices(hosts, stack, ambariClient, hostGroupAdjustment));
                 if (isSuccess(pollingResult)) {
-                    pollingResult = restartHadoopServices(stack, ambariClient, false);
+                    pollingResult = waitForAmbariOperations(stack, ambariClient, singletonMap("START_SERVICES", ambariClient.startAllServices()));
                     if (isSuccess(pollingResult)) {
-                        result.addAll(hosts);
+                        pollingResult = restartHadoopServices(stack, ambariClient, false);
+                        if (isSuccess(pollingResult)) {
+                            result.addAll(hosts);
+                        }
                     }
                 }
+            } catch (Exception ex) {
+                rollbackUpscaledInstances(stack, cluster, ambariClient, hostGroupAdjustment, hostMetadata);
             }
         }
         return result;
+    }
+
+    private void rollbackUpscaledInstances(Stack stack, Cluster cluster, AmbariClient ambariClient, HostGroupAdjustmentJson hostGroupAdjustment,
+            Set<HostMetadata> hostMetadata) {
+        Set<String> components = getHadoopComponents(cluster, ambariClient, hostGroupAdjustment.getHostGroup(),
+                cluster.getBlueprint().getBlueprintName());
+        Map<String, HostMetadata> hostsToRemove = new HashMap<>();
+        for (HostMetadata data : hostMetadata) {
+            hostsToRemove.put(data.getHostName(), data);
+        }
+        HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), hostGroupAdjustment.getHostGroup());
+        List<String> hostList = new ArrayList<>(hostsToRemove.keySet());
+        ambariHostsRemover.deleteHosts(stack, hostList, new ArrayList<>(components));
+        PollingResult pollingResult = restartHadoopServices(stack, ambariClient, true);
+        if (isSuccess(pollingResult)) {
+            hostGroup.getHostMetadata().removeAll(hostsToRemove.values());
+            hostGroupRepository.save(hostGroup);
+            for (HostMetadata metadata : hostsToRemove.values()) {
+                InstanceMetaData hostInStack = instanceMetadataRepository.findHostInStack(stack.getId(), metadata.getHostName());
+                instanceTerminationHandler.terminateInstance(stack, hostInStack);
+            }
+        }
     }
 
     public Cluster resetAmbariCluster(Long stackId) {
