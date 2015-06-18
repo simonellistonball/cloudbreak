@@ -32,11 +32,11 @@ import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Component
-public class SimpleSecurityService {
+public class TlsSecurityService {
 
     public static final String SSH_PUBLIC_KEY_EXTENSION = ".pub";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleSecurityService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TlsSecurityService.class);
     private static final String SSH_PUBLIC_KEY_COMMENT = "cloudbreak";
     private static final int DEFAULT_KEY_SIZE = 2048;
     private static final String SSH_KEY_PREFIX = "/cb-ssh-key-";

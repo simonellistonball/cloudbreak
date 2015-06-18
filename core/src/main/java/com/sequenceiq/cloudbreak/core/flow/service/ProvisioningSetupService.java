@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.SimpleSecurityService;
+import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
 
@@ -32,7 +32,7 @@ public class ProvisioningSetupService {
     private SecurityConfigRepository securityConfigRepository;
 
     @Inject
-    private SimpleSecurityService simpleSecurityService;
+    private TlsSecurityService tlsSecurityService;
 
     @Resource
     private Map<CloudPlatform, ProvisionSetup> provisionSetups;
@@ -40,13 +40,13 @@ public class ProvisioningSetupService {
     public ProvisionSetupComplete setup(Stack stack) throws Exception {
         ProvisionSetupComplete setupComplete = (ProvisionSetupComplete) provisionSetups.get(stack.cloudPlatform()).setupProvisioning(stack);
         stackRepository.save(stack);
-        simpleSecurityService.copyClientKeys(Paths.get(simpleSecurityService.getCertDir(stack.getId())));
-        simpleSecurityService.generateTempSshKeypair(stack.getId());
+        tlsSecurityService.copyClientKeys(Paths.get(tlsSecurityService.getCertDir(stack.getId())));
+        tlsSecurityService.generateTempSshKeypair(stack.getId());
         SecurityConfig securityConfig = new SecurityConfig();
-        securityConfig.setClientKey(Base64.encodeAsString(simpleSecurityService.readClientKey(stack.getId()).getBytes()));
-        securityConfig.setClientCert(Base64.encodeAsString(simpleSecurityService.readClientCert(stack.getId()).getBytes()));
-        securityConfig.setTemporarySshPrivateKey(Base64.encodeAsString(simpleSecurityService.readPrivateSshKey(stack.getId()).getBytes()));
-        securityConfig.setTemporarySshPublicKey(Base64.encodeAsString(simpleSecurityService.readPublicSshKey(stack.getId()).getBytes()));
+        securityConfig.setClientKey(Base64.encodeAsString(tlsSecurityService.readClientKey(stack.getId()).getBytes()));
+        securityConfig.setClientCert(Base64.encodeAsString(tlsSecurityService.readClientCert(stack.getId()).getBytes()));
+        securityConfig.setTemporarySshPrivateKey(Base64.encodeAsString(tlsSecurityService.readPrivateSshKey(stack.getId()).getBytes()));
+        securityConfig.setTemporarySshPublicKey(Base64.encodeAsString(tlsSecurityService.readPublicSshKey(stack.getId()).getBytes()));
         securityConfig.setStack(stack);
         securityConfigRepository.save(securityConfig);
         return setupComplete;
