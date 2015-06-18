@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -23,7 +24,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Subnet;
+import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.network.NetworkUtils;
@@ -150,9 +151,10 @@ public class GcpFireWallInResourceBuilder extends GcpSimpleNetworkResourceBuilde
     }
 
     private List<String> getSourceRanges(Stack stack) {
-        List<String> sourceRanges = new ArrayList<>(stack.getAllowedSubnets().size());
-        for (Subnet subnet : stack.getAllowedSubnets()) {
-            sourceRanges.add(subnet.getCidr());
+        Set<SecurityRule> securityRules = stack.getSecurityGroup().getSecurityRules();
+        List<String> sourceRanges = new ArrayList<>(securityRules.size());
+        for (SecurityRule securityRule : securityRules) {
+            sourceRanges.add(securityRule.getCidr());
         }
         return sourceRanges;
     }

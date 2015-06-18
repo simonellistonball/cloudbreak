@@ -87,7 +87,7 @@ public class HeatTemplateBuilder {
             model.put("agents", agents);
             model.put("core_user_data", formatUserData(coreUserData));
             model.put("gateway_user_data", formatUserData(gateWayUserData));
-            model.put("subnets", stack.getAllowedSubnets());
+            model.put("subnets", stack.getSecurityGroup().getSecurityRules());
             model.put("ports", NetworkUtils.getPorts(Optional.fromNullable(stack)));
             String generatedTemplate = processTemplateIntoString(freemarkerConfiguration.getTemplate(openStackHeatTemplatePath, "UTF-8"), model);
             LOGGER.debug("Generated Heat template: {}",  generatedTemplate);

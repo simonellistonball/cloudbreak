@@ -28,7 +28,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Subnet;
+import com.sequenceiq.cloudbreak.domain.SecurityRule;
 
 public final class NetworkUtils {
 
@@ -83,8 +83,8 @@ public final class NetworkUtils {
 
     private static List<EndpointRule> createACLRules(Stack stack) {
         List<EndpointRule> rules = new LinkedList<>();
-        for (Subnet net : stack.getAllowedSubnets()) {
-            rules.add(new EndpointRule(EndpointRule.Action.PERMIT.getText(), net.getCidr()));
+        for (SecurityRule rule : stack.getSecurityGroup().getSecurityRules()) {
+            rules.add(new EndpointRule(EndpointRule.Action.PERMIT.getText(), rule.getCidr()));
         }
         rules.add(EndpointRule.INTERNAL_RULE);
         rules.add(EndpointRule.DENY_RULE);

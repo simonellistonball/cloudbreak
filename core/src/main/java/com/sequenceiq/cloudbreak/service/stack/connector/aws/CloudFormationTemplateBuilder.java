@@ -30,7 +30,7 @@ public class CloudFormationTemplateBuilder {
         Map<String, Object> model = new HashMap<>();
         model.put("instanceGroups", stack.getInstanceGroupsAsList());
         model.put("existingVPC", existingVPC);
-        model.put("subnets", stack.getAllowedSubnets());
+        model.put("subnets", stack.getSecurityGroup().getSecurityRules());
         model.put("ports", NetworkUtils.getPorts(Optional.fromNullable(stack)));
         model.put("cbSubnet", stack.getNetwork().getSubnetCIDR());
         model.put("dedicatedInstances", awsStackUtil.areDedicatedInstancesRequested(stack));

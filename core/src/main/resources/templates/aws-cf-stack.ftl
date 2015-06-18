@@ -2,7 +2,7 @@
 {
   "AWSTemplateFormatVersion" : "2010-09-09",
 
-  "Description" : "CloudFormation template to create a VPC with a public subnet on EC2",
+  "Description" : "CloudFormation template to create a VPC with a public securityRule on EC2",
 
   "Parameters" : {
   
@@ -23,7 +23,7 @@
     },
 
     "SubnetCIDR" : {
-      "Description" : "IP address range in the subnet specified as CIDR notation",
+      "Description" : "IP address range in the securityRule specified as CIDR notation",
       "Type" : "String",
       "MinLength": "9",
       "MaxLength": "18",

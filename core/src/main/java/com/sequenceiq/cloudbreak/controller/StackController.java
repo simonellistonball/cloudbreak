@@ -32,9 +32,9 @@ import com.sequenceiq.cloudbreak.controller.json.StackValidationRequest;
 import com.sequenceiq.cloudbreak.controller.json.TemplateResponse;
 import com.sequenceiq.cloudbreak.controller.json.UpdateStackJson;
 import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackValidation;
-import com.sequenceiq.cloudbreak.domain.Subnet;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.decorator.Decorator;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -174,21 +174,21 @@ public class StackController {
             stackService.updateNodeCount(id, updateRequest.getInstanceGroupAdjustment());
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
-            List<Subnet> subnetList = (List<Subnet>) conversionService.convert(updateRequest.getAllowedSubnets(),
+            List<SecurityRule> securityRuleList = (List<SecurityRule>) conversionService.convert(updateRequest.getAllowedSubnets(),
                     TypeDescriptor.forObject(updateRequest.getAllowedSubnets()),
-                    TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(Subnet.class)));
-            decorateSubnetEntities(subnetList, stackService.get(id));
-            stackService.updateAllowedSubnets(id, subnetList);
+                    TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(SecurityRule.class)));
+//            decorateSecurityGroupEntity(securityRuleList, stackService.get(id));
+            stackService.updateAllowedSubnets(id, securityRuleList);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
     }
 
-    @ApiOperation(value = StackOpDescription.GET_METADATA, produces = ContentType.JSON, notes = "")
-    private void decorateSubnetEntities(List<Subnet> subnetList, Stack stack) {
-        for (Subnet subnet : subnetList) {
-            subnet.setStack(stack);
-        }
-    }
+//    @ApiOperation(value = StackOpDescription.GET_METADATA, produces = ContentType.JSON, notes = "")
+//    private void decorateSecurityGroupEntity(List<SecurityRule> securityRuleList, Stack stack) {
+//        for (SecurityRule securityRule : securityRuleList) {
+//            securityRule.setStack(stack);
+//        }
+//    }
 
     @ApiOperation(value = StackOpDescription.GET_BY_AMBARI_ADDRESS, produces = ContentType.JSON, notes = Notes.STACK_NOTES)
     @RequestMapping(value = "stacks/ambari", method = RequestMethod.POST)
@@ -211,7 +211,8 @@ public class StackController {
     private ResponseEntity<IdJson> createStack(CbUser user, StackRequest stackRequest, boolean publicInAccount) {
         Stack stack = conversionService.convert(stackRequest, Stack.class);
         MDCBuilder.buildMdcContext(stack);
-        stack = stackDecorator.decorate(stack, stackRequest.getCredentialId(), stackRequest.getConsulServerCount(), stackRequest.getNetworkId());
+        stack = stackDecorator.decorate(stack, stackRequest.getCredentialId(), stackRequest.getConsulServerCount(), stackRequest.getNetworkId(),
+                stackRequest.getSecurityGroupId());
         stack.setPublicInAccount(publicInAccount);
         stack = stackService.create(user, stack);
         return new ResponseEntity<>(new IdJson(stack.getId()), HttpStatus.CREATED);

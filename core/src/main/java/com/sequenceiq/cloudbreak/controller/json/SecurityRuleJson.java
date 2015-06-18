@@ -3,16 +3,16 @@ package com.sequenceiq.cloudbreak.controller.json;
 import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 
-@ApiModel("Subnet")
-public class SubnetJson implements JsonEntity {
+@ApiModel("SecurityRule")
+public class SecurityRuleJson implements JsonEntity {
 
     @ApiModelProperty(required = true)
     private String subnet;
 
-    public SubnetJson() {
+    public SecurityRuleJson() {
     }
 
-    public SubnetJson(String subnet) {
+    public SecurityRuleJson(String subnet) {
         this.subnet = subnet;
     }
 

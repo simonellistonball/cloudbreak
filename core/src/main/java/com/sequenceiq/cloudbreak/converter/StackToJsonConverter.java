@@ -11,10 +11,10 @@ import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
 import com.sequenceiq.cloudbreak.controller.json.FailurePolicyJson;
 import com.sequenceiq.cloudbreak.controller.json.InstanceGroupJson;
 import com.sequenceiq.cloudbreak.controller.json.StackResponse;
-import com.sequenceiq.cloudbreak.controller.json.SubnetJson;
+import com.sequenceiq.cloudbreak.controller.json.SecurityRuleJson;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Subnet;
+import com.sequenceiq.cloudbreak.domain.SecurityRule;
 
 @Component
 public class StackToJsonConverter extends AbstractConversionServiceAwareConverter<Stack, StackResponse> {
@@ -39,7 +39,7 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
         stackJson.setConsulServerCount(source.getConsulServers());
         stackJson.setRegion(source.getRegion());
         stackJson.setOnFailureAction(source.getOnFailureActionAction());
-        stackJson.setAllowedSubnets(convertSubnets(source.getAllowedSubnets()));
+//        stackJson.setAllowedSubnets(convertSubnets(source.getAllowedSecurityRules()));
         List<InstanceGroupJson> templateGroups = new ArrayList<>();
         templateGroups.addAll(convertInstanceGroups(source.getInstanceGroups()));
         stackJson.setInstanceGroups(templateGroups);
@@ -61,10 +61,10 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
         return stackJson;
     }
 
-    private List<SubnetJson> convertSubnets(Set<Subnet> source) {
-        return (List<SubnetJson>) getConversionService().convert(source,
+    private List<SecurityRuleJson> convertSubnets(Set<SecurityRule> source) {
+        return (List<SecurityRuleJson>) getConversionService().convert(source,
                 TypeDescriptor.forObject(source),
-                TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(SubnetJson.class)));
+                TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(SecurityRuleJson.class)));
     }
 
     private Set<InstanceGroupJson> convertInstanceGroups(Set<InstanceGroup> instanceGroups) {

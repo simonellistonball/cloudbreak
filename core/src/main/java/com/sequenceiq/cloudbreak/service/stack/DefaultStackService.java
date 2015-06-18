@@ -36,14 +36,14 @@ import com.sequenceiq.cloudbreak.domain.ScalingType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackValidation;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
-import com.sequenceiq.cloudbreak.domain.Subnet;
+import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.repository.SubnetRepository;
+import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
@@ -74,7 +74,7 @@ public class DefaultStackService implements StackService {
     @Inject
     private BlueprintValidator blueprintValidator;
     @Inject
-    private SubnetRepository subnetRepository;
+    private SecurityRuleRepository securityRuleRepository;
 
     @Override
     public Set<Stack> retrievePrivateStacks(CbUser user) {
@@ -154,7 +154,8 @@ public class DefaultStackService implements StackService {
         } else {
             try {
                 savedStack = stackRepository.save(stack);
-                subnetRepository.save(savedStack.getAllowedSubnets());
+                securityRuleRepository.save(savedStack.getSecurityGroup().getSecurityRules());
+                //Save the SecurityGroup that relates to the stack
                 instanceGroupRepository.save(savedStack.getInstanceGroups());
                 MDCBuilder.buildMdcContext(savedStack);
                 flowManager.triggerProvisioning(new ProvisionRequest(savedStack.cloudPlatform(), savedStack.getId()));
@@ -246,12 +247,12 @@ public class DefaultStackService implements StackService {
     }
 
     @Override
-    public void updateAllowedSubnets(Long stackId, List<Subnet> subnetList) {
+    public void updateAllowedSubnets(Long stackId, List<SecurityRule> securityRuleList) {
         Stack stack = stackRepository.findOne(stackId);
         if (!stack.isAvailable()) {
             throw new BadRequestException(String.format("Stack is currently in '%s' state. Security constraints cannot be updated.", stack.getStatus()));
         }
-        flowManager.triggerUpdateAllowedSubnets(new UpdateAllowedSubnetsRequest(stack.cloudPlatform(), stackId, subnetList));
+        flowManager.triggerUpdateAllowedSubnets(new UpdateAllowedSubnetsRequest(stack.cloudPlatform(), stackId, securityRuleList));
     }
 
     @Override

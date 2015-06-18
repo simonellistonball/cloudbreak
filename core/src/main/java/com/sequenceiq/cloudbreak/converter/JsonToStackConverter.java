@@ -10,13 +10,13 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.json.InstanceGroupJson;
 import com.sequenceiq.cloudbreak.controller.json.StackRequest;
-import com.sequenceiq.cloudbreak.controller.json.SubnetJson;
+import com.sequenceiq.cloudbreak.controller.json.SecurityRuleJson;
 import com.sequenceiq.cloudbreak.controller.validation.StackParam;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.domain.Subnet;
 
 @Component
 public class JsonToStackConverter extends AbstractConversionServiceAwareConverter<StackRequest, Stack> {
@@ -28,7 +28,7 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
         stack.setRegion(source.getRegion());
         stack.setOnFailureActionAction(source.getOnFailureAction());
         if (source.getAllowedSubnets() != null) {
-            stack.setAllowedSubnets(convertSubnets(source.getAllowedSubnets(), stack));
+//            stack.setAllowedSecurityRules(convertSubnets(source.getAllowedSubnets(), stack));
         }
         stack.setStatus(Status.REQUESTED);
         stack.setInstanceGroups(convertInstanceGroups(source.getInstanceGroups(), stack));
@@ -55,12 +55,12 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
         return params;
     }
 
-    private Set<Subnet> convertSubnets(List<SubnetJson> source, Stack stack) {
-        Set<Subnet> convertedSet = (Set<Subnet>) getConversionService().convert(source,
+    private Set<SecurityRule> convertSubnets(List<SecurityRuleJson> source, Stack stack) {
+        Set<SecurityRule> convertedSet = (Set<SecurityRule>) getConversionService().convert(source,
                 TypeDescriptor.forObject(source),
-                TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(Subnet.class)));
-        for (Subnet subNet : convertedSet) {
-            subNet.setStack(stack);
+                TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(SecurityRule.class)));
+        for (SecurityRule subNet : convertedSet) {
+//            subNet.setStack(stack);
         }
         return convertedSet;
     }

@@ -1,15 +1,15 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import com.sequenceiq.cloudbreak.controller.json.SubnetJson;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.domain.Subnet;
+import com.sequenceiq.cloudbreak.controller.json.SecurityRuleJson;
+import com.sequenceiq.cloudbreak.domain.SecurityRule;
 
 @Component
-public class SubnetToJsonConverter extends AbstractConversionServiceAwareConverter<Subnet, SubnetJson> {
+public class SubnetToJsonConverter extends AbstractConversionServiceAwareConverter<SecurityRule, SecurityRuleJson> {
 
     @Override
-    public SubnetJson convert(Subnet entity) {
-        return new SubnetJson(entity.getCidr());
+    public SecurityRuleJson convert(SecurityRule entity) {
+        return new SecurityRuleJson(entity.getCidr());
     }
 }
